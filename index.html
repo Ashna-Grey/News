@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f2f2f2;
+    }
+    header {
+      background: #1a73e8;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      margin: 1rem;
+    }
+    input[type="text"] {
+      width: 60%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px 0 0 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #1a73e8;
+      color: white;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+    }
+    .news-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+    .card-body h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+    }
+    .card-body p {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .card-body a {
+      margin-top: auto;
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Daily News Hub</h1>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Search news topic (e.g. Sports, Elon Musk)...">
+  <button onclick="searchNews()">Search</button>
+</div>
+
+<main class="news-container" id="newsContainer"></main>
+
+<script>
+  const apiKey = '264777c186bf410f9663b7ad4f9532ba';
+
+  async function fetchNews(query = '') {
+    const endpoint = query
+      ? `https://newsapi.org/v2/everything?q=${query}&language=en&apiKey=${apiKey}`
+      : `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+
+    const res = await fetch(endpoint);
+    const data = await res.json();
+
+    if (data.status !== 'ok') {
+      document.getElementById('newsContainer').innerHTML = `<p>Error loading news</p>`;
+      return;
+    }
+
+    displayNews(data.articles);
+  }
+
+  function displayNews(articles) {
+    const container = document.getElementById('newsContainer');
+    container.innerHTML = '';
+
+    if (articles.length === 0) {
+      container.innerHTML = `<p>No news found for this topic.</p>`;
+      return;
+    }
+
+    articles.forEach(article => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${article.urlToImage || 'https://via.placeholder.com/300'}" alt="News Image">
+        <div class="card-body">
+          <h3>${article.title}</h3>
+          <p>${article.description || 'No description available.'}</p>
+          <a href="${article.url}" target="_blank">Read More</a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function searchNews() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (query) fetchNews(query);
+  }
+
+  // Load top headlines on page load
+  fetchNews();
+</script>
+
+</body>
+</html>
